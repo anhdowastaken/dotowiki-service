@@ -119,6 +119,174 @@ app.get('/last_update', function(req, res) {
   });
 });
 
+app.get('/getHeroList', function(req, res) {
+  // Use connect method to connect to the Server
+  MongoClient.connect(mongodbUrl, function(err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      //HURRAY!! We are connected. :)
+      console.log('Connection established to', mongodbUrl);
+
+      // Do some work here with the database.
+      var collection;
+
+      collection = db.collection('heroes');
+      collection.find({}, {_id: 0, short_name: 1, localized_name: 1, icon_url: 1}).toArray(function(err, docs) {
+        if (err) {
+          console.log(err);
+          db.close();
+          return;
+        } else {
+          // console.log(docs.length);
+        }
+
+        //Close connection
+        db.close();
+        returnJSON(res, docs);
+      });
+    }
+  });
+});
+
+app.get('/getItemList', function(req, res) {
+  // Use connect method to connect to the Server
+  MongoClient.connect(mongodbUrl, function(err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      //HURRAY!! We are connected. :)
+      console.log('Connection established to', mongodbUrl);
+
+      // Do some work here with the database.
+      var collection;
+
+      collection = db.collection('items');
+      collection.find({}, {
+        _id: 0,
+        short_name: 1,
+        localized_name: 1,
+        icon_url: 1,
+        cost: 1,
+        isRecipe: 1
+      }).toArray(function(err, docs) {
+        if (err) {
+          console.log(err);
+          db.close();
+          return;
+        } else {
+          // console.log(docs.length);
+        }
+ 
+        //Close connection
+        db.close();
+        returnJSON(res, docs);
+      });
+    }
+  });
+});
+
+app.get('/getHero', function(req, res) {
+  if (req.query.short_name) {
+    // Use connect method to connect to the Server
+    MongoClient.connect(mongodbUrl, function(err, db) {
+      if (err) {
+        console.log('Unable to connect to the mongoDB server. Error:', err);
+      } else {
+        //HURRAY!! We are connected. :)
+        console.log('Connection established to', mongodbUrl);
+
+        // Do some work here with the database.
+        var collection;
+
+        collection = db.collection('heroes');
+        collection.findOne({ short_name: req.query.short_name }, function(err, item) {
+          if (err) {
+            console.log(err);
+            db.close();
+            return;
+          } else {
+            // console.log(docs.length);
+          }
+
+          //Close connection
+          db.close();
+          returnJSON(res, item);
+        });
+      }
+    });
+  }
+});
+
+app.get('/getItem', function(req, res) {
+  if (req.query.short_name) {
+    // Use connect method to connect to the Server
+    MongoClient.connect(mongodbUrl, function(err, db) {
+      if (err) {
+        console.log('Unable to connect to the mongoDB server. Error:', err);
+      } else {
+        //HURRAY!! We are connected. :)
+        console.log('Connection established to', mongodbUrl);
+
+        // Do some work here with the database.
+        var collection;
+
+        collection = db.collection('items');
+        collection.findOne({ short_name: req.query.short_name }, function(err, item) {
+          if (err) {
+            console.log(err);
+            db.close();
+            return;
+          } else {
+            // console.log(docs.length);
+          }
+
+          //Close connection
+          db.close();
+          returnJSON(res, item);
+        });
+      }
+    });
+  }
+});
+
+app.get('/getAbility', function(req, res) {
+  if (req.query.id) {
+    // Use connect method to connect to the Server
+    MongoClient.connect(mongodbUrl, function(err, db) {
+      if (err) {
+        console.log('Unable to connect to the mongoDB server. Error:', err);
+      } else {
+        //HURRAY!! We are connected. :)
+        console.log('Connection established to', mongodbUrl);
+
+        // Do some work here with the database.
+        var collection;
+
+        collection = db.collection('heroes');
+        collection.findOne({ abilities: { $elemMatch: { id: req.query.id } } }, function(err, item) {
+          if (err) {
+            console.log(err);
+            db.close();
+            return;
+          } else {
+            // console.log(docs.length);
+          }
+
+          //Close connection
+          db.close();
+          for (var ability of item.abilities) {
+            if (ability.id == req.query.id) {
+              returnJSON(res, ability);
+              return;
+            }
+          }
+        });
+      }
+    });
+  }
+});
+
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
